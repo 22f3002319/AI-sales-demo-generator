@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Sales Demo Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <div class="min-h-screen flex items-center justify-center p-6">
+      <div class="w-full max-w-2xl">
+        <div class="mb-6">
+          <h1 class="text-3xl font-semibold">AI Sales Demo Generator</h1>
+          <p class="text-slate-300 mt-2">
+            Paste a company website URL (and optionally LinkedIn). Get a shareable 10-slide demo link.
+          </p>
+        </div>
+
+        {% if error %}
+        <div class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
+          {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="/generate-demo" class="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6">
+          <div>
+            <label class="block text-sm text-slate-200 mb-1">Company name</label>
+            <input name="company_name" required class="w-full rounded-lg bg-slate-900/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Acme Inc" />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-200 mb-1">Website URL</label>
+            <input name="website_url" required class="w-full rounded-lg bg-slate-900/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="https://example.com" />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-200 mb-1">LinkedIn URL (optional)</label>
+            <input name="linkedin_url" class="w-full rounded-lg bg-slate-900/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="https://www.linkedin.com/company/..." />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-200 mb-1">Founder background (optional)</label>
+            <textarea name="founder_background" rows="3" class="w-full rounded-lg bg-slate-900/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Former X at Y, built Z..."></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-white/10">
+            <div>
+              <label class="block text-sm text-slate-200 mb-1">AI provider</label>
+              <select name="provider" class="w-full rounded-lg bg-slate-900/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="openai">OpenAI</option>
+                <option value="gemini">Gemini</option>
+              </select>
+              <p class="mt-1 text-xs text-slate-400">Choose which LLM to use for this demo.</p>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-200 mb-1">API key (optional)</label>
+              <input name="api_key" class="w-full rounded-lg bg-slate-900/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Per-request OpenAI or Gemini key" />
+              <p class="mt-1 text-xs text-slate-400">
+                If empty, falls back to server env
+                (<code class="text-slate-200">OPENAI_API_KEY</code> or <code class="text-slate-200">GEMINI_API_KEY</code>).
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-4 pt-2">
+            <button class="rounded-lg bg-indigo-500 px-4 py-2 font-medium text-white hover:bg-indigo-400">
+              Generate demo
+            </button>
+            <p class="text-sm text-slate-400">
+              Uses your per-request key if provided; otherwise server env.
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+

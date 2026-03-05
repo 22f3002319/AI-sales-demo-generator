@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ demo.company_name }} — Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <div class="min-h-screen flex flex-col">
+      <header class="px-6 py-4 border-b border-white/10 bg-white/5">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <div class="text-sm text-slate-300">AI Sales Demo</div>
+            <h1 class="text-xl font-semibold truncate">{{ demo.company_name }}</h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="/" class="text-sm rounded-lg border border-white/10 px-3 py-2 hover:bg-white/5">New</a>
+            <button id="copyLink" class="text-sm rounded-lg bg-indigo-500 px-3 py-2 font-medium hover:bg-indigo-400">Copy link</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 px-6 py-8">
+        <div class="max-w-5xl mx-auto">
+          <div id="slide" class="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-8 min-h-[420px]">
+            <!-- injected by JS -->
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <button id="prev" class="rounded-lg border border-white/10 px-4 py-2 hover:bg-white/5">Prev</button>
+            <div class="text-sm text-slate-300">
+              <span id="counter"></span>
+            </div>
+            <button id="next" class="rounded-lg bg-indigo-500 px-4 py-2 font-medium hover:bg-indigo-400">Next</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const slides = {{ slides_json | safe }};
+      let idx = 0;
+
+      function slideIndexFromHash() {
+        const m = window.location.hash.match(/#slide-(\d+)/);
+        if (!m) return 0;
+        const n = parseInt(m[1], 10);
+        if (Number.isNaN(n)) return 0;
+        return Math.max(0, Math.min(slides.length - 1, n - 1));
+      }
+
+      function setHashFromIdx() {
+        window.location.hash = `slide-${idx + 1}`;
+      }
+
+      function render() {
+        const s = slides[idx];
+        const bullets = (s.bullets || []).map(b => `
+          <li class="flex gap-3">
+            <span class="mt-2 h-2 w-2 rounded-full bg-indigo-400 shrink-0"></span>
+            <span class="text-slate-100/90">${escapeHtml(b)}</span>
+          </li>
+        `).join("");
+
+        document.getElementById("slide").innerHTML = `
+          <div class="flex flex-col gap-5">
+            <div>
+              <div class="text-slate-400 text-sm">Slide ${idx + 1} of ${slides.length}</div>
+              <h2 class="text-3xl font-semibold mt-1">${escapeHtml(s.title || "")}</h2>
+              <p class="text-slate-300 mt-2">${escapeHtml(s.subtitle || "")}</p>
+            </div>
+            <ul class="mt-2 space-y-3 text-lg">${bullets}</ul>
+          </div>
+        `;
+
+        document.getElementById("counter").textContent = `Slide ${idx + 1} / ${slides.length}`;
+        document.getElementById("prev").disabled = idx === 0;
+        document.getElementById("next").disabled = idx === slides.length - 1;
+        document.getElementById("prev").classList.toggle("opacity-50", idx === 0);
+        document.getElementById("next").classList.toggle("opacity-50", idx === slides.length - 1);
+
+        setHashFromIdx();
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      document.getElementById("prev").addEventListener("click", () => {
+        idx = Math.max(0, idx - 1);
+        render();
+      });
+      document.getElementById("next").addEventListener("click", () => {
+        idx = Math.min(slides.length - 1, idx + 1);
+        render();
+      });
+      window.addEventListener("hashchange", () => {
+        idx = slideIndexFromHash();
+        render();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") document.getElementById("prev").click();
+        if (e.key === "ArrowRight") document.getElementById("next").click();
+      });
+      document.getElementById("copyLink").addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          document.getElementById("copyLink").textContent = "Copied";
+          setTimeout(() => (document.getElementById("copyLink").textContent = "Copy link"), 1200);
+        } catch (e) {
+          alert("Could not copy link");
+        }
+      });
+
+      idx = slideIndexFromHash();
+      render();
+    </script>
+  </body>
+</html>
+

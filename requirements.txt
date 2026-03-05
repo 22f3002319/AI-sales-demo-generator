@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+jinja2
+python-multipart
+beautifulsoup4
+playwright
+openai
+google-generativeai
